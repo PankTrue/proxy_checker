@@ -16,21 +16,21 @@ char *get_global_ip()
     char *data,*origin;
     int fd;
 
-    dest_host = gethostbyname(DEST_HOST);
-    memcpy(&addr.sin_addr,*(dest_host->h_addr_list),4);
+    if((dest_host = gethostbyname(DEST_HOST)) == NULL) { log_fatal("error resolv "DEST_HOST); }
+    memcpy(&addr.sin_addr,*(dest_host->h_addr_list),sizeof(addr.sin_addr));
     addr.sin_port = htons(DEST_PORT);
     addr.sin_family = AF_INET;
 
-    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { log_error("error create socket"); return 0; }
+    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { log_error("error create socket"); return NULL; }
 
     set_timeout(fd,16);
 
-    if(connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) { log_error("error connect to "DEST_HOST); return 0; }
+    if(connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) { log_error("error connect to "DEST_HOST); return NULL; }
 
 
-    if((data = simple_get_request(fd)) == NULL) { log_error("error simple get request"); return 0; }
+    if((data = simple_get_request(fd)) == NULL) { log_error("error simple get request"); return NULL; }
 
-    if((global_ip = parse_origin(data)) == NULL) { log_error("error parse global ip"); return 0; }
+    if((global_ip = parse_origin(data)) == NULL) { log_error("error parse global ip"); return NULL; }
 
     log_info("global ip: %s",global_ip);
 
@@ -137,8 +137,8 @@ void create_proxy_checker(proxy_thread_t *t)
 
     switch (t->proxy_type)
     {
-        case Socks4: if(socks4_connect(&t->client) != 0) {goto done;} anonlvl = High; break;
-        case Socks5: break;
+        case Socks4: if(socks4_connect(&t->client) != 0) { goto done; } anonlvl = High; break;
+        case Socks5: if(socks5_connect(&t->client) != 0) { goto done; } anonlvl = High; break;
         case Http:
     default:
         log_warn("proxy not support!");
@@ -204,7 +204,7 @@ pthread_mutex_unlock(&l);
 
 sblist *load_proxy(const char *filename)
 {
-        proxy_t *curr;
+        proxy_t curr_proxy;
         sblist *proxy_list;
         FILE *proxy_file;
 
@@ -212,7 +212,7 @@ sblist *load_proxy(const char *filename)
         char line[128];
         char *line_p = line;
         bool end_file = false;
-        char *spliter,*end_port;
+        char *spliter;
 
 
         proxy_file = fopen(filename,"r"); if(proxy_file <= 0) { log_error("proxy file (%s) not found!",filename); };
@@ -234,15 +234,14 @@ sblist *load_proxy(const char *filename)
 
             if((spliter = strstr(line,":")) == NULL)  goto end;
 
-            curr = (proxy_t *)malloc(sizeof (proxy_t));
-            memset(curr,0,sizeof (proxy_t));
+            memset(&curr_proxy,0,sizeof (proxy_t));
 
-            memcpy(curr->ip,line,(size_t)(spliter-line)); //copy ip
+            memcpy(curr_proxy.ip,line,(size_t)(spliter-line)); //copy ip
             spliter++; // skip ':'
 
-            curr->port = (uint16_t)atoi(spliter); //copy port
+            curr_proxy.port = (uint16_t)atoi(spliter); //copy port
 
-            sblist_add(proxy_list,curr);
+            sblist_add(proxy_list,&curr_proxy);
             line_p = line;
         }
 
