@@ -131,21 +131,22 @@ error:
 
 void create_proxy_checker(proxy_thread_t *t)
 {
+    char *data;
     enum anonimity_level anonlvl;
     if(proxy_client_connect(&t->client,timeout,t->proxy->ip,t->proxy->port) != 0) goto done;
 
 
     switch (t->proxy_type)
     {
-        case Socks4: if(socks4_connect(&t->client) != 0) { goto done; } anonlvl = High; break;
-        case Socks5: if(socks5_connect(&t->client) != 0) { goto done; } anonlvl = High; break;
-        case Http:
+        case Socks4: if(socks4_connect(&t->client)      != 0) { goto done; } anonlvl = High; break;
+        case Socks5: if(socks5_connect(&t->client)      != 0) { goto done; } anonlvl = High; break;
+        case Http:   if(http_connect(&t->client,&data)  != 0) { goto done; } anonlvl = parse_anonimity_level(data); break;
     default:
-        log_warn("proxy not support!");
+        log_error("proxy not support!");
         break;
     }
 
-    //TODO: add load httpbin.org and check response
+    //TODO: add load httpbin.org and check response for socks4/5
 
     save_proxy(t->proxy,t->output_file,t->proxy_type,anonlvl);
 
@@ -267,7 +268,7 @@ char *parse_origin(char *data)
 
      char *start_origin,*end_origin;
 
-     if((start_origin = strstr(data,"\"origin\":")) == NULL) { log_error("page is not have origin");goto error; };
+     if((start_origin = strstr(data,"\"origin\":")) == NULL) { goto error; };
 
      start_origin += sizeof("\"origin\": "); //skip "origin:"
 

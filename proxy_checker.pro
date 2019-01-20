@@ -10,7 +10,8 @@ SOURCES += \
         proxy.c \
         sblist.c \
         socks4.c \
-    socks5.c
+    socks5.c \
+    http.c
 
 
 HEADERS += \
@@ -19,7 +20,8 @@ HEADERS += \
         proxy.h \
         sblist.h \
         socks4.h \
-    socks5.h
+    socks5.h \
+    http.h
 
 
 LIBS += -lpthread

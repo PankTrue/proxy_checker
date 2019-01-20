@@ -94,6 +94,7 @@ if(check_socks4)
     }
 }
 
+//socks5
 if(check_socks5)
 {
     log_info("Start checking socks5");
@@ -110,5 +111,21 @@ if(check_socks5)
     }
 }
 
+//http
+if(check_http)
+{
+    log_info("Start checking http");
+    for (proxy_t *it = proxy_list->items; it != proxy_list->items+(proxy_list->count * proxy_list->itemsize); it++)
+    {
+        current_thread = get_free_thread(threads,workers_max);
+
+        current_thread->proxy_type  = Http;
+        current_thread->proxy       = it;
+        current_thread->output_file = output_filename_proxy;
+
+        if(pthread_create(&current_thread->pt, NULL, &create_proxy_checker, current_thread) != 0)
+            log_error("pthread_create failed.");
+    }
+}
     return 0;
 }
