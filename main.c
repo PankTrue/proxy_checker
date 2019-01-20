@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <getopt.h>
 
 #include "log.h"
 #include "socks4.h"
@@ -18,6 +18,19 @@ uint    timeout                 = TIMEOUT;
 
 
 
+static struct option long_opts[] =
+{
+    {"help",     no_argument,        0, 'h'},
+    {"workers",  required_argument,  0, 'w'},
+    {"input",    required_argument,  0, 'i'},
+    {"output",   required_argument,  0, 'o'},
+    {"types",    required_argument,  0, 't'},
+    {"timeout",  required_argument,  0, 'u'},
+    {"print",    required_argument,  0, 'p'},
+    {0,0,0,0}
+};
+
+
 void init()
 {
     log_set_level(2);
@@ -28,7 +41,9 @@ int main(int argc, char **argv)
 {
 init();
 
-    for(int opt; (opt = getopt(argc,argv,"h?w:i:o:t:u:p")) != -1; )
+    int opt,opti = 0;
+    /* parse arguments */
+    for(; (opt = getopt_long(argc,argv,"h?w:i:o:t:u:p",long_opts,&opti)) != -1; )
     {
         switch (opt)
         {
@@ -51,22 +66,22 @@ init();
                 print_online_proxy = true;
                 break;
             default:
-                printf( "Usage: %s [-w workers] [-t 4,5,h]\n"
-                        "  -h, -?       this message\n"
-                        "  -w           max count workers\n"
-                        "  -i           input proxy file\n"
-                        "  -o           output proxy file\n"
-                        "  -t           proxy types\n"
-                        "  -p           print online proxies\n"
-                        "  -u           timeout\n",
-                        argv[0]);
+            printf( "Usage: %s [-w workers] [-t 4,5,h]\n"
+                    "  -h, -? --help    this message\n"
+                    "  -w --workers     max workers\n"
+                    "  -i --input       input proxy file\n"
+                    "  -o --output      output proxy file\n"
+                    "  -t --types       proxy types (4,5,h)\n"
+                    "  -u --timeout     socket read/write timeout\n"
+                    "  -p --print       print online proxies\n",
+                    argv[0]);
             return (opt == '?' || opt == 'h') ? EXIT_SUCCESS : EXIT_FAILURE;
         }
     }
 
-    bool check_socks4           = parse_proxy_type(Socks4,proxy_kinds);
-    bool check_socks5           = parse_proxy_type(Socks5,proxy_kinds);
-    bool check_http             = parse_proxy_type(Http,  proxy_kinds);
+    bool check_socks4   = parse_proxy_type(Socks4,proxy_kinds);
+    bool check_socks5   = parse_proxy_type(Socks5,proxy_kinds);
+    bool check_http     = parse_proxy_type(Http,  proxy_kinds);
 
 
     sblist*         proxy_list      = load_proxy(input_filename_proxy);
@@ -127,5 +142,7 @@ if(check_http)
             log_error("pthread_create failed.");
     }
 }
-    return 0;
+
+
+return 0;
 }
