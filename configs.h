@@ -8,7 +8,8 @@
 #define INPUT_FILENAME_DEFAULT      "input.txt"
 #define OUTPUT_FILENAME_DEFAULT     "output.txt"
 #define PRINT_ONLINE_PROXY_DEFAULT  false
-#define TIMEOUT                     16
+#define TIMEOUT_DEFAULT             16
+#define CHECK_ORIGIN_DEFAULT        false
 
 
 

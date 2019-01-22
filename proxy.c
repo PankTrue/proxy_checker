@@ -2,6 +2,7 @@
 
 extern uint timeout;
 extern bool print_online_proxy;
+extern bool check_orig;
 
 
 
@@ -140,16 +141,18 @@ void create_proxy_checker(proxy_thread_t *t)
     {
         case Socks4: if(socks4_connect(&t->client)      != 0) { goto done; } anonlvl = High; break;
         case Socks5: if(socks5_connect(&t->client)      != 0) { goto done; } anonlvl = High; break;
-        case Http:   if(http_connect(&t->client,&data)  != 0) { goto done; } anonlvl = parse_anonimity_level(data); break;
+        case Http:   if(http_connect(&t->client,&data)  != 0) { goto done; } anonlvl = parse_anonimity_level(data); free(data); break;
     default:
         log_error("proxy not support!");
         break;
     }
 
-    //TODO: add load httpbin.org and check response for socks4/5
+    if(check_orig)
+    {
+        if(check_origin(t->client.fd,t->proxy) != 0) goto done;
+    }
 
     save_proxy(t->proxy,t->output_file,t->proxy_type,anonlvl);
-
 
     static uint counter = 0;
     if(print_online_proxy)
@@ -280,4 +283,29 @@ return origin;
 error:
     free(origin);
     return NULL;
+}
+
+int check_origin(int fd, proxy_t *p)
+{
+    static pthread_mutex_t l;
+    char *origin,*data;
+
+    if((data = simple_get_request(fd))  == NULL) return 1;
+    if((origin = parse_origin(data))    == NULL) return 1;
+
+    if(strstr(origin,p->ip) == NULL)
+    {
+        pthread_mutex_lock(&l);
+
+        FILE *file = fopen("invalid_origin.txt","a");
+        fprintf(file,"%s=>%s\r\n",p->ip,origin);
+        fclose(file);
+
+        pthread_mutex_unlock(&l);
+    }
+
+free(data);
+free(origin);
+
+return 0;
 }
