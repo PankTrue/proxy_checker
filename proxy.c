@@ -147,7 +147,8 @@ void create_proxy_checker(proxy_thread_t *t)
         break;
     }
 
-    if(check_orig)
+    if( check_orig &&
+        t->proxy_type != Http) // ignore http because already checked in parse_anonimity_level
     {
         if(check_origin(t->client.fd,t->proxy) != 0) goto done;
     }
