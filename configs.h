@@ -12,15 +12,16 @@
 #define CHECK_ORIGIN_DEFAULT        false
 #define RANGE_START_DEFAULT         16777216
 #define RANGE_END_DEFAULT           4294967295
+#define RANGE_STATUS_FILE_DEFAULT   "status.ini"
 
 
 
-#define DEST_HOST "httpbin.org"
-#define DEST_PORT 80
+#define DEST_HOST                   "httpbin.org"
+#define DEST_PORT                   80
 
 
 
-#define GET_FREE_THREAD_USLEEP 100
-#define SBLIST_BLOCK_SIZE 1024
+#define GET_FREE_THREAD_USLEEP      100
+#define SBLIST_BLOCK_SIZE           1024
 
 #endif // CONFIGS_H

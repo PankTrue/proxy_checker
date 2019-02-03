@@ -67,7 +67,6 @@ int main(int argc, char **argv)
 init();
 
 
-
 if(strstr(argv[1],"checker"))
 {
     /* parse arguments */
@@ -145,6 +144,8 @@ if(strstr(argv[1],"checker"))
 }
 else if (strstr(argv[1],"scanner"))
 {
+    load_range_status(RANGE_STATUS_FILE_DEFAULT,&range_start,&range_end);
+
     /* parse arguments */
     for(; (opt = getopt_long(argc,argv,"h?r:w:o:t:u:pc",long_opts_checker,&opti)) != -1; )
     {
@@ -219,8 +220,8 @@ else if (strstr(argv[1],"scanner"))
 
         log_info("status: %u/%u | %lf%%", proxy_addr,range_end, ((double)proxy_addr/range_end)*100.0);
 
-//todo: add save/load status
-}
+        save_range_status(RANGE_STATUS_FILE_DEFAULT, proxy_addr, range_end);
+    }
 
 
 }

@@ -9,6 +9,7 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <regex.h>
+#include <unistd.h>
 
 #include "log.h"
 #include "sblist.h"
@@ -104,7 +105,9 @@ void checking_from_range(uint32_t proxy_addr, uint16_t *ports, size_t ports_coun
                          size_t worker_max, enum proxy_type type);
 
 
+
 void create_proxy_checker(proxy_thread_t *t);
+
 
 
 void set_timeout(int sock_fd, uint16_t sec);
@@ -112,13 +115,16 @@ void dest_addr_init(proxy_client_t *c);
 int proxy_client_connect(proxy_client_t *client,uint16_t timeout, proxy_t *proxy);
 
 
+
 proxy_thread_t *get_free_thread(proxy_thread_t *t, size_t size);
 size_t get_worked_threads_count(proxy_thread_t *t, size_t size);
 
 
-
+int load_range_status(char *filename, uint32_t *range_start, uint32_t *range_end);
+void save_range_status(char *filename, uint32_t range_start, uint32_t range_end);
 sblist *load_proxy(const char *filename);
 void save_proxy(proxy_t *p,char *filename,enum proxy_type type,enum anonimity_level lvl);
+
 
 
 char *get_global_ip();

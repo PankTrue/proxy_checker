@@ -369,3 +369,33 @@ void checking_from_range(uint32_t proxy_addr_begin, uint16_t *ports, size_t port
 
     }
 }
+
+int load_range_status(char *filename, uint32_t *range_start, uint32_t *range_end)
+{
+    char buf[32], *sepr;
+
+    if(access(filename,F_OK) == -1) { return 1; }
+
+    FILE *f = fopen(filename,"r"); if(f <= 0) { log_error("can't open range_status (%s)",filename); return 1; }
+
+    if(fread(buf,sizeof(char),32,f) <= 0) { log_error("can't read range_status"); return 1; }
+
+    *range_start = atoi(buf);
+
+    if((sepr = strstr(buf,"-")) == NULL) return 2 ; //2 - without range_end
+
+    *range_end = atoi(sepr+1);
+
+
+    fclose(f);
+return 0;
+}
+
+void save_range_status(char *filename, uint32_t range_start, uint32_t range_end)
+{
+    FILE *f = fopen(filename, "w"); if(f <= 0) { log_error("can't open range_status (%s)",filename); }
+
+    fprintf(f,"%u-%u", range_start, range_end);
+
+    fclose(f);
+}
