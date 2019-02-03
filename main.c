@@ -118,62 +118,29 @@ if(strstr(argv[1],"checker"))
 
     sblist*         proxy_list      = load_proxy(input_filename_proxy);
     proxy_thread_t* threads         = malloc(sizeof(proxy_thread_t)*workers_max);
-    proxy_thread_t* current_thread  = NULL;
+
 
     for (proxy_thread_t *it = threads; it != threads + workers_max; it++)
         it->done = -1;
 
 
-//socks4
-if(check_socks4)
-{
-    log_info("Start checking socks4");
-    for (proxy_t *it = proxy_list->items; it != proxy_list->items+(proxy_list->count * proxy_list->itemsize); it++)
+    if(check_socks4)
     {
-        current_thread = get_free_thread(threads,workers_max);
-
-        current_thread->proxy_type  = Socks4;
-        current_thread->proxy       = it;
-        current_thread->output_file = output_filename_proxy;
-
-        if(pthread_create(&current_thread->pt, NULL, &create_proxy_checker, current_thread) != 0)
-            log_error("pthread_create failed.");
+        log_info("Start checking socks4");
+        checking_from_list(proxy_list,output_filename_proxy,threads,workers_max,Socks4);
     }
-}
 
-//socks5
-if(check_socks5)
-{
-    log_info("Start checking socks5");
-    for (proxy_t *it = proxy_list->items; it != proxy_list->items+(proxy_list->count * proxy_list->itemsize); it++)
+    if(check_socks5)
     {
-        current_thread = get_free_thread(threads,workers_max);
-
-        current_thread->proxy_type  = Socks5;
-        current_thread->proxy       = it;
-        current_thread->output_file = output_filename_proxy;
-
-        if(pthread_create(&current_thread->pt, NULL, &create_proxy_checker, current_thread) != 0)
-            log_error("pthread_create failed.");
+        log_info("Start checking socks5");
+        checking_from_list(proxy_list,output_filename_proxy,threads,workers_max,Socks5);
     }
-}
 
-//http
-if(check_http)
-{
-    log_info("Start checking http");
-    for (proxy_t *it = proxy_list->items; it != proxy_list->items+(proxy_list->count * proxy_list->itemsize); it++)
+    if(check_http)
     {
-        current_thread = get_free_thread(threads,workers_max);
-
-        current_thread->proxy_type  = Http;
-        current_thread->proxy       = it;
-        current_thread->output_file = output_filename_proxy;
-
-        if(pthread_create(&current_thread->pt, NULL, &create_proxy_checker, current_thread) != 0)
-            log_error("pthread_create failed.");
+        log_info("Start checking http");
+        checking_from_list(proxy_list,output_filename_proxy,threads,workers_max,Http);
     }
-}
 
 
 

@@ -95,6 +95,8 @@ static char dest_host_buffer[16];
 
 
 
+void checking_from_list(sblist *proxy_list, char *output_filename_proxy,proxy_thread_t *threads, size_t worker_max, enum proxy_type type);
+
 void create_proxy_checker(proxy_thread_t *t);
 
 
