@@ -215,6 +215,11 @@ else if (strstr(argv[1],"scanner"))
         if(check_http)
             checking_from_range(proxy_addr,ports_http,sizeof(ports_http)/sizeof(ports_http[0]),
                                 output_filename_proxy,threads,workers_max,Http);
+
+
+        log_info("status: %u/%u | %lf%%", proxy_addr,range_end, ((double)proxy_addr/range_end)*100.0);
+
+//todo: add save/load status
 }
 
 

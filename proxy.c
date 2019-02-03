@@ -137,6 +137,7 @@ error:
 void create_proxy_checker(proxy_thread_t *t)
 {
     char *data;
+    bool used_malloc=false;
     enum anonimity_level anonlvl;
     if(proxy_client_connect(&t->client,timeout,t->proxy) != 0) goto done;
 
@@ -157,6 +158,14 @@ void create_proxy_checker(proxy_thread_t *t)
         if(check_origin(t->client.fd,t->proxy) != 0) goto done;
     }
 
+    if(t->proxy == NULL)
+    {
+        t->proxy = malloc(sizeof(proxy_t));
+        used_malloc = true;
+        decimal_to_ip(t->proxy->ip,htonl(t->client.socks_addr.v4.sin_addr.s_addr));
+        t->proxy->port = htons(t->client.socks_addr.v4.sin_port);
+    }
+
     save_proxy(t->proxy,t->output_file,t->proxy_type,anonlvl);
 
     static uint counter = 0;
@@ -164,6 +173,7 @@ void create_proxy_checker(proxy_thread_t *t)
         log_info("%s:%d worked! [%u]",t->proxy->ip,t->proxy->port,++counter);
 
 done:
+    if(used_malloc) free(t->proxy);
     t->done = 1;
     close(t->client.fd);
 }
@@ -345,13 +355,13 @@ void checking_from_range(uint32_t proxy_addr_begin, uint16_t *ports, size_t port
         {
             current_thread = get_free_thread(threads,workers_max);
 
-            current_thread->proxy_type  = type;
-            current_thread->proxy       = NULL;
-            current_thread->output_file = output_filename_proxy;
+            current_thread->proxy_type      = type;
+            current_thread->output_file     = output_filename_proxy;
+            current_thread->proxy           = NULL;
 
-            //set addr and port
             current_thread->client.socks_addr.v4.sin_addr.s_addr    = htonl(proxy_addr);
             current_thread->client.socks_addr.v4.sin_port           = htons(ports[proxy_port]);
+
 
             if(pthread_create(&current_thread->pt, NULL, &create_proxy_checker, current_thread) != 0)
                 log_error("pthread_create failed.");
