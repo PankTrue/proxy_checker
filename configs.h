@@ -10,6 +10,8 @@
 #define PRINT_ONLINE_PROXY_DEFAULT  false
 #define TIMEOUT_DEFAULT             16
 #define CHECK_ORIGIN_DEFAULT        false
+#define RANGE_START_DEFAULT         16777216
+#define RANGE_END_DEFAULT           4294967295
 
 
 

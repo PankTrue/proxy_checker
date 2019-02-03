@@ -27,7 +27,7 @@ void sblist_free(sblist *l)
 
 void *sblist_get(sblist *l, size_t n)
 {
-    if(n > l->count) { log_fatal("out of list"); }
+    if(n > l->count) { log_fatal_with_backtrace("out of list"); }
 return (l->items + (n * l->itemsize));
 }
 
@@ -41,7 +41,7 @@ void sblist_add(sblist *l, void *item)
     char *tmp;
     if(l->count == l->max_count)
     {
-        if((tmp = realloc(l->items,(l->max_count + l->blockitems) * l->itemsize)) == 0) { log_fatal("Out of memory!"); }
+        if((tmp = realloc(l->items,(l->max_count + l->blockitems) * l->itemsize)) == 0) { log_fatal_with_backtrace("Out of memory!"); }
         l->max_count += l->blockitems;
         l->items       = tmp;
     }
