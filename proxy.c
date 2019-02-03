@@ -38,10 +38,14 @@ char *get_global_ip()
 return global_ip;
 }
 
-int proxy_client_connect(proxy_client_t *client,uint16_t timeout, char *proxy_ip, uint16_t proxy_port)
+int proxy_client_connect(proxy_client_t *client,uint16_t timeout, proxy_t *proxy)
 {
-    inet_pton(AF_INET,proxy_ip,&client->socks_addr.v4.sin_addr);
-    client->socks_addr.v4.sin_port = htons(proxy_port);
+    if(proxy != NULL)
+    {
+        inet_pton(AF_INET,proxy->ip,&client->socks_addr.v4.sin_addr);
+        client->socks_addr.v4.sin_port = htons(proxy->port);
+    }
+
     client->socks_addr.v4.sin_family = AF_INET;
 
     if ((client->fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { return 1; }
@@ -134,7 +138,7 @@ void create_proxy_checker(proxy_thread_t *t)
 {
     char *data;
     enum anonimity_level anonlvl;
-    if(proxy_client_connect(&t->client,timeout,t->proxy->ip,t->proxy->port) != 0) goto done;
+    if(proxy_client_connect(&t->client,timeout,t->proxy) != 0) goto done;
 
 
     switch (t->proxy_type)
@@ -327,4 +331,31 @@ void checking_from_list(sblist *proxy_list, char *output_filename_proxy, proxy_t
             log_error("pthread_create failed.");
     }
 
+}
+
+void checking_from_range(uint32_t proxy_addr_begin, uint16_t *ports, size_t ports_count,
+                         char *output_filename_proxy, proxy_thread_t *threads,
+                         size_t workers_max, enum proxy_type type)
+{
+    proxy_thread_t* current_thread  = NULL;
+
+    for(uint32_t proxy_addr = proxy_addr_begin; proxy_addr < (proxy_addr_begin + workers_max); proxy_addr++)
+    {
+        for (uint proxy_port = 0; proxy_port < ports_count; ++proxy_port)
+        {
+            current_thread = get_free_thread(threads,workers_max);
+
+            current_thread->proxy_type  = type;
+            current_thread->proxy       = NULL;
+            current_thread->output_file = output_filename_proxy;
+
+            //set addr and port
+            current_thread->client.socks_addr.v4.sin_addr.s_addr    = htonl(proxy_addr);
+            current_thread->client.socks_addr.v4.sin_port           = htons(ports[proxy_port]);
+
+            if(pthread_create(&current_thread->pt, NULL, &create_proxy_checker, current_thread) != 0)
+                log_error("pthread_create failed.");
+        }
+
+    }
 }

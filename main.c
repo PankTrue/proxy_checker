@@ -142,9 +142,6 @@ if(strstr(argv[1],"checker"))
         checking_from_list(proxy_list,output_filename_proxy,threads,workers_max,Http);
     }
 
-
-
-
 }
 else if (strstr(argv[1],"scanner"))
 {
@@ -195,16 +192,30 @@ else if (strstr(argv[1],"scanner"))
     bool check_http     = parse_proxy_type(Http,  proxy_types);
 
 
+    proxy_thread_t* threads = malloc(sizeof(proxy_thread_t)*workers_max);
+
+
+    for (proxy_thread_t *it = threads; it != threads + workers_max; it++)
+        it->done = -1;
+
+
     log_info("staring checking range %u-%u",range_start,range_end);
 
 
     for(uint32_t proxy_addr = range_start; proxy_addr <= range_end; proxy_addr += workers_max)
     {
-        for (uint proxy_port = 0; proxy_port < (sizeof(ports_socks4)/sizeof(ports_socks4[0])); ++proxy_port)
-        {
-            //todo: impl
-        }
-    }
+        if(check_socks4)
+            checking_from_range(proxy_addr,ports_socks4,sizeof(ports_socks4)/sizeof(ports_socks4[0]),
+                                output_filename_proxy,threads,workers_max,Socks4);
+
+        if(check_socks5)
+            checking_from_range(proxy_addr,ports_socks5,sizeof(ports_socks5)/sizeof(ports_socks5[0]),
+                                output_filename_proxy,threads,workers_max,Socks5);
+
+        if(check_http)
+            checking_from_range(proxy_addr,ports_http,sizeof(ports_http)/sizeof(ports_http[0]),
+                                output_filename_proxy,threads,workers_max,Http);
+}
 
 
 }

@@ -73,7 +73,7 @@ typedef struct
 typedef struct
 {
     proxy_client_t      client;
-    proxy_t   *proxy;
+    proxy_t             *proxy;
     FILE                *output_file;
     enum proxy_type     proxy_type;
     pthread_t           pt;
@@ -95,14 +95,21 @@ static char dest_host_buffer[16];
 
 
 
-void checking_from_list(sblist *proxy_list, char *output_filename_proxy,proxy_thread_t *threads, size_t worker_max, enum proxy_type type);
+void checking_from_list(sblist *proxy_list, char *output_filename_proxy,
+                        proxy_thread_t *threads, size_t worker_max,
+                        enum proxy_type type);
+
+void checking_from_range(uint32_t proxy_addr, uint16_t *ports, size_t ports_count,
+                         char *output_filename_proxy,proxy_thread_t *threads,
+                         size_t worker_max, enum proxy_type type);
+
 
 void create_proxy_checker(proxy_thread_t *t);
 
 
 void set_timeout(int sock_fd, uint16_t sec);
 void dest_addr_init(proxy_client_t *c);
-int proxy_client_connect(proxy_client_t *client,uint16_t timeout, char *proxy_ip, uint16_t proxy_port);
+int proxy_client_connect(proxy_client_t *client,uint16_t timeout, proxy_t *proxy);
 
 
 proxy_thread_t *get_free_thread(proxy_thread_t *t, size_t size);
