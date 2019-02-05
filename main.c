@@ -18,12 +18,12 @@ bool        check_orig              = CHECK_ORIGIN_DEFAULT;
 uint        timeout                 = TIMEOUT_DEFAULT;
 uint32_t    range_start             = RANGE_START_DEFAULT;
 uint32_t    range_end               = RANGE_END_DEFAULT;
+sblist      *ports_socks4           = NULL;
+sblist      *ports_socks5           = NULL;
+sblist      *ports_http             = NULL;
 
 
 
-uint16_t ports_socks4[] = { 4145 };
-uint16_t ports_socks5[] = { 1080 };
-uint16_t ports_http[] = { 53281,80,8080,/*8081,21776,3128,41258*/ };
 
 
 
@@ -44,6 +44,7 @@ static struct option long_opts_scanner[] =
 {
     {"help",            no_argument,        0, 'h'},
     {"range",           required_argument,  0, 'r'},
+    {"ports",           required_argument,  0, 's'},
     {"workers",         required_argument,  0, 'w'},
     {"output",          required_argument,  0, 'o'},
     {"types",           required_argument,  0, 't'},
@@ -52,6 +53,7 @@ static struct option long_opts_scanner[] =
     {"check_origin",    no_argument,        0, 'c'},
     {0,0,0,0}
 };
+
 
 void init()
 {
@@ -146,11 +148,20 @@ else if (strstr(argv[1],"scanner"))
 {
     load_range_status(RANGE_STATUS_FILE_DEFAULT,&range_start,&range_end);
 
+    ports_socks4 = parse_ports(PORTS_DEFAULT,Socks4);
+    ports_socks5 = parse_ports(PORTS_DEFAULT,Socks5);
+    ports_http   = parse_ports(PORTS_DEFAULT,Http);
+
     /* parse arguments */
     for(; (opt = getopt_long(argc,argv,"h?r:w:o:t:u:pc",long_opts_checker,&opti)) != -1; )
     {
         switch (opt)
         {
+            case 's':
+                ports_socks4 = parse_ports(optarg,Socks4);
+                ports_socks5 = parse_ports(optarg,Socks5);
+                ports_http   = parse_ports(optarg,Http);
+
             case 'r':
                 range_start = atoi(optarg);
                 range_end   = atoi(strstr(optarg,"-")+1);
@@ -174,8 +185,9 @@ else if (strstr(argv[1],"scanner"))
                 check_orig = true;
                 break;
             default:
-            printf( "Usage: %s scanner [-w workers] [-t 4,5,h] [-r 16777216-4294967295]\n"
-                    "  -h, -? --help        this message\n"
+            printf( "Usage: %s scanner [-w workers] [-t 4,5,h] [-r 16777216-4294967295] [ -s 4[4145,1488]5[1080]h[80,8080] ]\n"
+                    "  -h --help, -?        this message\n"
+                    "  -s --ports           port list for check[]\n"
                     "  -r --range           checking range(16777216-4294967295 equal 1.0.0.0-255.255.255.255)\n"
                     "  -w --workers         max workers\n"
                     "  -o --output          output proxy file\n"
@@ -206,15 +218,15 @@ else if (strstr(argv[1],"scanner"))
     for(uint32_t proxy_addr = range_start; proxy_addr <= range_end; proxy_addr += workers_max)
     {
         if(check_socks4)
-            checking_from_range(proxy_addr,ports_socks4,sizeof(ports_socks4)/sizeof(ports_socks4[0]),
+            checking_from_range(proxy_addr,ports_socks4->items,ports_socks4->count,
                                 output_filename_proxy,threads,workers_max,Socks4);
 
         if(check_socks5)
-            checking_from_range(proxy_addr,ports_socks5,sizeof(ports_socks5)/sizeof(ports_socks5[0]),
+            checking_from_range(proxy_addr,ports_socks5->items,ports_socks5->count,
                                 output_filename_proxy,threads,workers_max,Socks5);
 
         if(check_http)
-            checking_from_range(proxy_addr,ports_http,sizeof(ports_http)/sizeof(ports_http[0]),
+            checking_from_range(proxy_addr,ports_http->items,ports_http->count,
                                 output_filename_proxy,threads,workers_max,Http);
 
 

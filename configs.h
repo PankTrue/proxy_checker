@@ -13,6 +13,7 @@
 #define RANGE_START_DEFAULT         16777216
 #define RANGE_END_DEFAULT           4294967295
 #define RANGE_STATUS_FILE_DEFAULT   "status.ini"
+#define PORTS_DEFAULT               "4[4145]5[1080]h[80,8080]"
 
 
 

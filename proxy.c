@@ -148,7 +148,7 @@ void create_proxy_checker(proxy_thread_t *t)
         case Socks5: if(socks5_connect(&t->client)      != 0) { goto done; } anonlvl = High; break;
         case Http:   if(http_connect(&t->client,&data)  != 0) { goto done; } anonlvl = parse_anonimity_level(data); free(data); break;
     default:
-        log_error("proxy not support!");
+        log_warn("proxy isn't support!");
         break;
     }
 
@@ -398,4 +398,55 @@ void save_range_status(char *filename, uint32_t range_start, uint32_t range_end)
     fprintf(f,"%u-%u", range_start, range_end);
 
     fclose(f);
+}
+
+sblist *parse_ports(char *data, enum proxy_type type)
+{
+    uint16_t item;
+    char *splitter, *begin, *end, *p;
+
+    switch (type)
+    {
+        case Socks4: splitter = "4["; break;
+        case Socks5: splitter = "5["; break;
+        case Http:   splitter = "h["; break;
+        default:
+            log_warn("proxy isn't support");
+            break;
+    }
+
+    sblist *list = sblist_create(sizeof(uint16_t),16);
+
+    begin = strstr(data,splitter);  if(begin == NULL) return NULL; begin++;
+    end   = strstr(begin, "]");     if(begin == NULL) return NULL;
+
+
+    while(begin && begin < end)
+    {
+        begin++;
+        item = atoi(begin);
+        sblist_add(list,&item);
+        begin = strstr(begin,",");
+    }
+return list;
+}
+
+size_t arr_size(void *array, size_t element_size)
+{
+    size_t size = 0;
+    char *a = array;
+    bool is_zero = false;
+
+    while (1)
+    {
+        for(char *p = a; p != (a + element_size); p++)
+        {
+            if(*p) { is_zero = false; break; }
+            else {is_zero = true; }
+        }
+        if(is_zero) break;
+        size++;
+        a += element_size;
+    }
+return size;
 }

@@ -130,9 +130,12 @@ void save_proxy(proxy_t *p,char *filename,enum proxy_type type,enum anonimity_le
 char *get_global_ip();
 void decimal_to_ip(char *dest_buf, uint32_t src_addr);
 char *simple_get_request(int fd);
-char *parse_origin(char *data);
 int check_origin(int fd,proxy_t *p);
+size_t arr_size(void *array, size_t element_size);
 
+
+char *parse_origin(char *data);
+sblist *parse_ports(char *data, enum proxy_type type);
 bool parse_proxy_type(enum proxy_type type,char *proxy_kinds);
 
 
