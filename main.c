@@ -153,15 +153,15 @@ else if (strstr(argv[1],"scanner"))
     ports_http   = parse_ports(PORTS_DEFAULT,Http);
 
     /* parse arguments */
-    for(; (opt = getopt_long(argc,argv,"h?r:w:o:t:u:pc",long_opts_checker,&opti)) != -1; )
+    for(; (opt = getopt_long(argc,argv,"h?r:w:o:t:u:s:pc",long_opts_checker,&opti)) != -1; )
     {
         switch (opt)
         {
             case 's':
-                ports_socks4 = parse_ports(optarg,Socks4);
-                ports_socks5 = parse_ports(optarg,Socks5);
-                ports_http   = parse_ports(optarg,Http);
-
+                if(strstr(optarg, "4[") != NULL) { ports_socks4 = parse_ports(optarg,Socks4); }
+                if(strstr(optarg, "5[") != NULL) { ports_socks5 = parse_ports(optarg,Socks5); }
+                if(strstr(optarg, "h[") != NULL) { ports_http   = parse_ports(optarg,Http);   }
+                break;
             case 'r':
                 range_start = atoi(optarg);
                 range_end   = atoi(strstr(optarg,"-")+1);
