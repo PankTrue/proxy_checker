@@ -75,7 +75,7 @@ typedef struct
 {
     proxy_client_t      client;
     proxy_t             *proxy;
-    FILE                *output_file;
+    char                *output_file;
     enum proxy_type     proxy_type;
     pthread_t           pt;
     int                 done;
