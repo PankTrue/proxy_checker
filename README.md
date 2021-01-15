@@ -2,7 +2,7 @@
 Multithreaded proxy checker
 
 
-###Check proxies from file:###
+###Check proxies from file:
 
 "Usage: checker [-w workers] [-t 4,5,h]\n"
 *        "  -h, -? --help        this message\n"
@@ -15,7 +15,7 @@ Multithreaded proxy checker
 *        "  -c --check_origin    origin != proxy_addr\n",
           
 
-###Check proxies from range:###
+###Check proxies from range:
 
 "Usage: scanner [-w workers] [-t 4,5,h] [-r 16777216-4294967295] [ -s 4[4145,1488]5[1080]h[80,8080] ]\n"
 *                    "  -h --help, -?        this message\n"
