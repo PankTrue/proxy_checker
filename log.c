@@ -49,7 +49,7 @@ void log_log(int level, const char *file, int line, const char *fmt, ...)
         va_list args;
         buf[strftime(buf, sizeof(buf), "%H:%M:%S", lt)] = '\0';
 
-        fprintf(stderr, "%s %s%-5s\x1b[0m\x1b[90m%s:%d:\x1b[0m ",
+        fprintf(stderr, "%s %s%-5s\x1b[0m\x1b[90m %s:%d:\x1b[0m ",
             buf, level_colors[level], level_names[level], file, line);
 
         va_start(args, fmt);
